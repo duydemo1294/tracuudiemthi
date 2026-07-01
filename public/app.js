@@ -459,7 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (r.TI && parseFloat(r.TI) >= 8) extraBoost += 0.1;
                     return count > 0 ? (score/count) * extraBoost : 0;
                 },
-                getReason: (r) => `Tư duy Toán (${r.TOAN || 0}) và các môn Tự nhiên rất tốt! Chuyên ngành: Phát triển phần mềm, Lập trình Web, Lập trình Game, Ứng dụng phần mềm, Kiểm thử phần mềm.`
+                getReason: (r) => `Tư duy Toán (${r.TOAN || 0}) và các môn Tự nhiên rất tốt! Chuyên ngành: <strong>Phát triển phần mềm, Lập trình Web, Lập trình Game, Ứng dụng phần mềm</strong>.`
             },
             {
                 name: 'Digital Marketing',
@@ -552,8 +552,22 @@ document.addEventListener('DOMContentLoaded', () => {
             topCareers = careers.slice(0, 4);
         }
         
-        topCareers.forEach((item) => {
-            const score = item.calculate(record);
+        // Find the highest score among the other selected careers
+        let maxOtherScore = 0;
+        if (topCareers.length > 1) {
+            maxOtherScore = Math.max(...topCareers.slice(1).map(c => c.calculate(record)));
+        }
+        
+        topCareers.forEach((item, index) => {
+            let score = item.calculate(record);
+            
+            // If this is the IT career pushed to index 0, artificially boost its score so its percentage is highest
+            if (index === 0 && item.category === 'Công nghệ thông tin') {
+                if (score <= maxOtherScore) {
+                    score = maxOtherScore + 0.15; // Adds ~1.5% - 2% visually
+                }
+            }
+            
             const matchPercentage = Math.min(Math.round(score * 10), 99);
             const reason = item.getReason(record);
             
