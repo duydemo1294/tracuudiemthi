@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isStaticMode || !response || response.status === 404) {
                 try {
                     // Query direct (works with browser CORS extensions)
-                    response = await fetch(`https://diemthi.vnexpress.net/index/detail/sbd/${sbd}/year/2026`);
+                    response = await fetch(`https://api-tracuudiem.thitotnghiepthpt.edu.vn/Search_Score_/GetStudentMark?SBD={sbd}/year/2026`);
                     const htmlText = await response.text();
                     
                     const record = {
