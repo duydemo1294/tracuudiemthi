@@ -1,6 +1,12 @@
 {
-  "private": true,
-  "dependencies": {
-    "@vercel/edge": "^0.1.2"
-  }
+  "name": "thpt2026-tra-diem",
+  "version": "1.0.0",
+  "description": "Hệ thống tra cứu điểm thi Tốt nghiệp THPT 2026",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

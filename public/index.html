@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO Optimization -->
+    <title>Cổng Tra Cứu Điểm Thi Tốt Nghiệp THPT Quốc Gia 2026</title>
+    <meta name="description" content="Tra cứu điểm thi tốt nghiệp THPT Quốc gia nhanh chóng, chính xác. Xem phổ điểm chi tiết, điểm trung bình và xếp loại học lực tạm tính trực tiếp từ dữ liệu Chính phủ.">
+    <meta name="keywords" content="tra cứu điểm thi, điểm thi thpt, thpt quốc gia, xem điểm tốt nghiệp, baochinhphu, sbd thpt">
+    <link rel="shortcut icon" href="https://static-cttcp.cdnchinhphu.vn/baochinhphu/image/favicon1.png" type="image/x-icon" />
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS (Not requested, using premium Vanilla CSS in style.css) -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Subtle background decorations -->
+    <div class="bg-gradient-mesh"></div>
+
+    <!-- Header Section -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="header-logo-group">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/2/20/FPT_Polytechnic.png" alt="Logo FPT Polytechnic" class="header-logo-img">
+                <div class="header-titles">
+                    <span class="sub-title">HỆ THỐNG TRA CỨU ĐỒNG BỘ</span>
+                    <h1 class="main-title">HỆ THỐNG TRA CỨU ĐIỂM THI TỐT NGHIỆP THPT 2026</h1>
+                </div>
+            </div>
+            <div class="header-badge">Hệ Thống Trực Tuyến</div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="app-container">
+        
+        <!-- Search and Form Section -->
+        <section class="search-section">
+            <div class="card glassmorphism search-card">
+                <h2 class="search-card-title">Nhập Số Báo Danh Của Bạn</h2>
+                <p class="search-card-desc">Nhập chính xác số báo danh gồm 8 chữ số được ghi trên phiếu đăng ký dự thi để bắt đầu tra cứu kết quả.</p>
+                
+                <form id="search-form" class="search-form">
+                    <div class="input-wrapper">
+                        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <input 
+                            type="text" 
+                            id="sbd-input" 
+                            placeholder="Ví dụ: 01012345" 
+                            maxlength="8" 
+                            pattern="\d{8}" 
+                            inputmode="numeric" 
+                            autocomplete="off"
+                            required
+                        >
+                        <span class="char-counter" id="char-counter">0/8</span>
+                    </div>
+                    <div class="button-group">
+                        <button type="button" id="btn-clear" class="btn btn-secondary">
+                            Xóa SBD
+                        </button>
+                        <button type="submit" id="btn-submit" class="btn btn-primary">
+                            <span>Tra Cứu</span>
+                            <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Quick Test SBD -->
+                <div class="quick-test-section">
+                    <span>Số báo danh chạy thử nghiệm:</span>
+                    <button type="button" id="test-sbd-btn" class="badge-test">01012345</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Status & Messages Section -->
+        <section id="status-container" class="status-section d-none">
+            <!-- Error message template -->
+            <div id="error-card" class="card error-card d-none">
+                <div class="error-content">
+                    <div class="error-icon-wrapper">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <div class="error-texts">
+                        <h3 class="error-title">Không Tìm Thấy Kết Quả</h3>
+                        <p id="error-message" class="error-desc">Vui lòng kiểm tra lại Số báo danh. Số báo danh phải là 8 chữ số và đã được đăng ký thi THPT.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Shimmer/Skeleton Screen -->
+            <div id="loading-card" class="card loading-card d-none">
+                <div class="shimmer-header">
+                    <div class="shimmer-bar short skeleton"></div>
+                    <div class="shimmer-bar medium skeleton"></div>
+                </div>
+                <div class="shimmer-stats-grid">
+                    <div class="shimmer-stat-card skeleton"></div>
+                    <div class="shimmer-stat-card skeleton"></div>
+                    <div class="shimmer-stat-card skeleton"></div>
+                </div>
+                <div class="shimmer-grid">
+                    <div class="shimmer-item skeleton"></div>
+                    <div class="shimmer-item skeleton"></div>
+                    <div class="shimmer-item skeleton"></div>
+                    <div class="shimmer-item skeleton"></div>
+                    <div class="shimmer-item skeleton"></div>
+                    <div class="shimmer-item skeleton"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results Section (Dynamic) -->
+        <section id="result-container" class="result-section d-none">
+            <div class="result-layout">
+                
+                <!-- Candidate Profile Summary Card -->
+                <div class="card glassmorphism candidate-summary-card">
+                    <div class="candidate-header">
+                        <div class="candidate-avatar">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <div class="candidate-info">
+                            <span class="candidate-label">THÍ SINH THPT QUỐC GIA</span>
+                            <h2 class="candidate-sbd" id="display-sbd">SBD: 01012345</h2>
+                        </div>
+                    </div>
+
+                    <!-- Statistics Dashboard -->
+                    <div class="stats-dashboard">
+                        <div class="stat-card">
+                            <span class="stat-label">Điểm Trung Bình</span>
+                            <div class="stat-value" id="stat-gpa">---</div>
+                            <span class="stat-subtext" id="stat-gpa-sub">Tính trên các môn thi</span>
+                        </div>
+
+                        <div class="stat-card">
+                            <span class="stat-label">Môn Cao Nhất / Thấp Nhất</span>
+                            <div class="stat-value" id="stat-range">---</div>
+                            <span class="stat-subtext" id="stat-range-sub">Chênh lệch môn thi</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scores Table Details -->
+                <div class="scores-card-wrapper">
+                    <div class="scores-title-bar">
+                        <h3>Chi Tiết Điểm Số Các Môn</h3>
+                        <span class="badge" id="subject-count">0 Môn Thi</span>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="scores-table">
+                            <thead>
+                                <tr>
+                                    <th>Môn Thi</th>
+                                    <th class="text-center">Điểm Số</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scores-table-body">
+                                <!-- Score rows are loaded dynamically from JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Extra Analytical Insight -->
+                <div class="card glassmorphism analysis-insight-card">
+                    <h3 class="insight-title">Phân Tích Tổ Hợp Xét Tuyển</h3>
+                    <p class="insight-desc">Dưới đây là một số tổ hợp điểm thi môn xét tuyển Đại học phổ biến tạm tính từ kết quả thi của thí sinh:</p>
+                    <div class="combinations-grid" id="combinations-container">
+                        <!-- Combinations like A00, A01, B00, C00, D01 populated via JS -->
+                    </div>
+                </div>
+
+                <!-- Career Recommendation Card -->
+                <div class="card glassmorphism career-card">
+                    <h3 class="insight-title">Ngành Nghề Gợi Ý Phù Hợp</h3>
+                    <p class="insight-desc">Phân tích định hướng ngành học tối ưu dựa trên năng lực điểm thi của bạn:</p>
+                    <div class="career-list" id="career-recommendations-container">
+                        <!-- Populated via JS -->
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="main-footer">
+        <div class="footer-container">
+            <p class="footer-copyright">© 2026 Cổng thông tin tra cứu trực tuyến THPT. Toàn bộ bản quyền thuộc cơ quan chủ quản.</p>
+            <p class="footer-source">Dữ liệu được cập nhật tự động thời gian thực từ API chuyên trang <a href="https://baochinhphu.vn/tra-cuu-diem-thi.htm" target="_blank" rel="noopener noreferrer">Báo Điện Tử Chính Phủ</a>.</p>
+        </div>
+    </footer>
+
+    <!-- App Script -->
+    <script src="app.js"></script>
+</body>
+</html>
