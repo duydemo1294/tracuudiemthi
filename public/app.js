@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isStaticMode || !response || response.status === 404) {
                 try {
                     // Query direct (works with browser CORS extensions)
-                    response = await fetch(`https://api-tracuudiem.thitotnghiepthpt.edu.vn/Search_Score_/GetStudentMark?SBD={sbd}/year/2026`);
+                    response = await fetch(`https://vietnamnet.vn/giao-duc/diem-thi/tra-cuu-diem-thi-tot-nghiep-thpt/2026/${sbd}.html`);
                     const htmlText = await response.text();
                     
                     const record = {
@@ -129,12 +129,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     };
                     
                     let foundAny = false;
-                    const regex = /<span class="sub-name">([^<]+)<\/span>\s*<strong class="sub-score">([^<]+)<\/strong>/gi;
+                    const regex = /<td>(.*?)<\/td>\s*<td>(.*?)<\/td>/gi;
                     let match;
                     
+                    function decodeHtml(html) {
+                        return html.replace(/&#x([0-9A-Fa-f]+);/ig, (match, hex) => String.fromCharCode(parseInt(hex, 16)));
+                    }
+                    
                     while ((match = regex.exec(htmlText)) !== null) {
-                        const subjectName = match[1].trim().toLowerCase();
-                        const scoreVal = match[2].trim().replace(',', '.');
+                        const subjectName = decodeHtml(match[1]).trim().toLowerCase();
+                        const scoreVal = match[2].trim();
                         
                         let key = null;
                         if (subjectName.includes('toán')) key = 'TOAN';
@@ -144,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         else if (subjectName.includes('sinh')) key = 'SI';
                         else if (subjectName.includes('sử')) key = 'SU';
                         else if (subjectName.includes('địa')) key = 'DI';
-                        else if (subjectName.includes('pháp luật') || subjectName.includes('gdcd')) key = 'KTPL';
+                        else if (subjectName.includes('pháp luật') || subjectName.includes('gdcd') || subjectName.includes('giáo dục')) key = 'KTPL';
                         else if (subjectName.includes('ngoại ngữ')) key = 'NN';
                         
                         if (key) {
@@ -169,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.error('CORS Blocked direct fetch:', corsErr);
                     showError(
                         `<strong>Hệ thống đang chạy ở chế độ Tĩnh (Static HTML).</strong><br><br>` +
-                        `Do máy chủ VnExpress chặn kết nối trực tiếp từ trình duyệt (lỗi CORS), bạn cần làm một trong hai cách sau:<br>` +
+                        `Do máy chủ VietNamNet chặn kết nối trực tiếp từ trình duyệt (lỗi CORS), bạn cần làm một trong hai cách sau:<br>` +
                         `1. Cài tiện ích Chrome/Edge: <strong>Allow CORS: Access-Control-Allow-Origin</strong> và bật tiện ích lên để vượt rào cản.<br>` +
                         `2. Hoặc tải mã nguồn chạy trên máy tính qua lệnh <code>npm start</code>.`
                     );
