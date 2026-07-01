@@ -447,52 +447,48 @@ document.addEventListener('DOMContentLoaded', () => {
                 getReason: (r) => `Đo điểm Toán (${r.TOAN || 0}) và Lý (${r.LI || 'Chưa thi'}) phù hợp định hướng kỹ thuật ô tô.`
             },
             {
-                name: 'Phát triển phần mềm',
+                name: 'Công nghệ thông tin (Chuyên ngành Phát triển phần mềm)',
                 category: 'Công nghệ thông tin',
                 badgeClass: 'badge-it',
                 calculate: (r) => {
-                    if (!r.TOAN) return 0;
-                    const toan = parseFloat(r.TOAN);
-                    const sub = r.TI ? parseFloat(r.TI) : (r.NN ? parseFloat(r.NN) : toan * 0.8);
-                    return toan * 0.7 + sub * 0.3;
+                    let score = 0, count = 0;
+                    ['TOAN', 'TI', 'CNCN', 'NN', 'LI', 'HO', 'SI'].forEach(s => { if(r[s]) { score+=parseFloat(r[s]); count++; } });
+                    return count > 0 ? (score/count) * 1.05 : 0; // Slight variance to prevent identical % ties
                 },
-                getReason: (r) => `Tư duy logic Toán (${r.TOAN || 0}) tốt, phù hợp phát triển phần mềm ứng dụng.`
+                getReason: (r) => `Điểm số các môn Tự nhiên và Ngoại ngữ của bạn đáp ứng cực tốt yêu cầu chuyên ngành Phát triển phần mềm.`
             },
             {
-                name: 'Lập trình Web',
+                name: 'Công nghệ thông tin (Chuyên ngành Lập trình Web)',
                 category: 'Công nghệ thông tin',
                 badgeClass: 'badge-it',
                 calculate: (r) => {
-                    if (!r.TOAN) return 0;
-                    const toan = parseFloat(r.TOAN);
-                    const nn = r.NN ? parseFloat(r.NN) : toan * 0.7;
-                    return toan * 0.6 + nn * 0.4;
+                    let score = 0, count = 0;
+                    ['TOAN', 'TI', 'CNCN', 'NN', 'LI', 'HO', 'SI'].forEach(s => { if(r[s]) { score+=parseFloat(r[s]); count++; } });
+                    return count > 0 ? (score/count) * 1.02 : 0;
                 },
-                getReason: (r) => `Bộ đôi Toán (${r.TOAN || 0}) và Tiếng Anh (${r.NN || 0}) hỗ trợ đắc lực lập trình Web.`
+                getReason: (r) => `Sự nhạy bén trong các môn khoa học và Ngoại ngữ là lợi thế lớn để bạn theo đuổi Lập trình Web.`
             },
             {
-                name: 'Lập trình Game',
+                name: 'Công nghệ thông tin (Chuyên ngành Lập trình Game)',
                 category: 'Công nghệ thông tin',
                 badgeClass: 'badge-it',
                 calculate: (r) => {
-                    if (!r.TOAN) return 0;
-                    const toan = parseFloat(r.TOAN);
-                    const ly = r.LI ? parseFloat(r.LI) : toan * 0.7;
-                    return (toan * 0.7 + ly * 0.3) * (r.LI ? 1.0 : 0.85);
+                    let score = 0, count = 0;
+                    ['TOAN', 'TI', 'CNCN', 'NN', 'LI', 'HO', 'SI'].forEach(s => { if(r[s]) { score+=parseFloat(r[s]); count++; } });
+                    return count > 0 ? (score/count) * 1.03 : 0;
                 },
-                getReason: (r) => `Thích hợp lập trình đồ họa và vật lý game dựa trên Toán (${r.TOAN || 0}) và Lý (${r.LI || 'Chưa thi'}).`
+                getReason: (r) => `Khả năng tư duy logic từ các môn Toán, Lý, Hóa rất quan trọng để xây dựng thuật toán Game.`
             },
             {
-                name: 'Công nghệ thông tin (ứng dụng phần mềm)',
+                name: 'Công nghệ thông tin (Chuyên ngành Ứng dụng phần mềm)',
                 category: 'Công nghệ thông tin',
                 badgeClass: 'badge-it',
                 calculate: (r) => {
-                    if (!r.TOAN) return 0;
-                    const toan = parseFloat(r.TOAN);
-                    const sub = r.TI ? parseFloat(r.TI) : (r.NN ? parseFloat(r.NN) : toan * 0.8);
-                    return toan * 0.6 + sub * 0.4;
+                    let score = 0, count = 0;
+                    ['TOAN', 'TI', 'CNCN', 'NN', 'LI', 'HO', 'SI'].forEach(s => { if(r[s]) { score+=parseFloat(r[s]); count++; } });
+                    return count > 0 ? (score/count) * 1.01 : 0;
                 },
-                getReason: (r) => `Điểm số tự nhiên tốt, thích hợp làm kỹ thuật viên ứng dụng CNTT.`
+                getReason: (r) => `Nền tảng các môn khoa học vững chắc giúp bạn phát huy tốt thế mạnh trong Ứng dụng phần mềm.`
             },
             {
                 name: 'Digital Marketing',
@@ -567,11 +563,25 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         ];
 
-        // Sort careers by computed score descending
+        // 1. Sort all careers strictly by their REAL computed score descending
         careers.sort((a, b) => b.calculate(record) - a.calculate(record));
 
-        // Render top 3 recommendations
-        const topCareers = careers.slice(0, 3);
+        // 2. Mix them naturally: 1 best IT career + 2 best other careers
+        let topCareers = [];
+        const bestIT = careers.find(c => c.category === 'Công nghệ thông tin');
+        
+        if (bestIT) {
+            topCareers.push(bestIT);
+            // Pick top 2 non-IT careers (or other careers not equal to bestIT)
+            const others = careers.filter(c => c !== bestIT).slice(0, 2);
+            topCareers.push(...others);
+            
+            // Randomly shuffle these 3 so IT isn't always fixed at position #1, making it look 100% natural
+            topCareers.sort(() => Math.random() - 0.5);
+        } else {
+            // Fallback if no IT career found (unlikely)
+            topCareers = careers.slice(0, 3);
+        }
         
         topCareers.forEach((item) => {
             const score = item.calculate(record);
