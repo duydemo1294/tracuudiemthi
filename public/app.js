@@ -165,8 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     // Directly jump to render since we parsed it
                     hideLoading();
-                    renderScoreBoard(record);
-                    renderCareers(record);
+                    renderScores(sbd, record);
                     return;
 
                 } catch (corsErr) {
@@ -228,8 +227,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return 'score-card-mid';
     }
 
-
-
     // Render results view
     function renderScores(sbd, record) {
         hideLoading();
@@ -267,16 +264,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // 1. Render Subject Table Rows
         activeScores.forEach((item) => {
             const rowClass = getScoreClass(item.score);
-            let evaluationText = 'Đạt';
-            let evalClass = 'eval-mid';
-            if (item.score >= 8.0) {
-                evaluationText = 'Giỏi';
-                evalClass = 'eval-high';
-            } else if (item.score < 5.0) {
-                evaluationText = 'Chưa Đạt';
-                evalClass = 'eval-low';
-            }
-
             const tr = document.createElement('tr');
             tr.className = `score-row ${rowClass}`;
             tr.innerHTML = `
@@ -285,7 +272,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span class="score-badge">${item.score.toFixed(2).replace(/\.00$/, '')}</span>
                 </td>
             `;
-            
             scoresTableBody.appendChild(tr);
         });
 
@@ -338,15 +324,6 @@ document.addEventListener('DOMContentLoaded', () => {
         combConfigs.forEach((config) => {
             let isValid = true;
             let sum = 0;
-
-            // Check if foreign language is N1 (Tiếng Anh) for A01 and D01 combinations
-            if (config.id === 'A01' || config.id === 'D01') {
-                const langCode = record['MON_NN'] ? String(record['MON_NN']).trim().toUpperCase() : '';
-                if (langCode !== 'N1') {
-                    // Standard combination maps to N1 English, but we can compute it if language exists
-                    // Let's check if NN exists, regardless of N1 code, to be lenient, but flag it
-                }
-            }
 
             for (const subKey of config.subjects) {
                 const valStr = record[subKey];
@@ -457,7 +434,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 calculate: (r) => {
                     let score = 0, count = 0;
                     ['TOAN', 'TI', 'CNCN', 'NN', 'LI', 'HO', 'SI'].forEach(s => { if(r[s]) { score+=parseFloat(r[s]); count++; } });
-                    // Boost the score heavily if Math or IT specifically are high
                     let extraBoost = 1.0;
                     if (r.TOAN && parseFloat(r.TOAN) >= 8) extraBoost += 0.05;
                     if (r.TI && parseFloat(r.TI) >= 8) extraBoost += 0.1;
@@ -508,7 +484,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 calculate: (r) => {
                     if (!r.TOAN) return 0;
                     const toan = parseFloat(r.TOAN);
-                    const ly = r.LI ? parseFloat(r.LI) : toan * 0.8;
+                    const ly = r.LI ? parseFloat(r.LI) : toan * 0.6;
                     return (toan * 0.6 + ly * 0.4) * (r.LI ? 1.0 : 0.8);
                 },
                 getReason: (r) => `Tự động hóa đòi hỏi tư duy Toán (${r.TOAN || 0}) mạch lạc và kiến thức vật lý lý thuyết.`
@@ -538,40 +514,65 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         ];
 
-        // 1. Sort all careers strictly by their REAL computed score descending
+        // 1. Sắp xếp toàn bộ các ngành dựa trên điểm số gốc thực tế
         careers.sort((a, b) => b.calculate(record) - a.calculate(record));
 
-        // 2. Mix them naturally: 1 best IT career + 3 best other careers
+        // 2. Phân tích bộ tổ hợp để kiểm tra điều kiện đẩy Công nghệ thông tin
+        const scoreToan = parseFloat(record.TOAN) || 0;
+        const scoreLy = parseFloat(record.LI) || 0;
+        const scoreHoa = parseFloat(record.HO) || 0;
+        const scoreAnh = parseFloat(record.NN) || 0;
+        const scoreTin = parseFloat(record.TI) || 0;
+        const scoreCNCN = parseFloat(record.CNCN) || 0;
+        const scoreCNNN = parseFloat(record.CNNN) || 0;
+        const scoreCongNghe = Math.max(scoreCNCN, scoreCNNN);
+
+        // Điều kiện 1: Thí sinh có điểm cao (>= 7.5) ở một trong các môn định hướng kỹ thuật/công nghệ/tự nhiên
+        const hasHighTechScores = (scoreToan >= 7.5 || scoreLy >= 7.5 || scoreHoa >= 7.5 || scoreAnh >= 7.5 || scoreTin >= 7.5 || scoreCongNghe >= 7.5);
+
+        // Điều kiện 2: Thí sinh có tham gia chọn khối thi tự nhiên/kỹ thuật
+        const isNaturalScienceGroup = (scoreLy > 0 || scoreHoa > 0 || scoreTin > 0 || scoreCongNghe > 0);
+
+        // Tổng kết điều kiện hợp lệ để ưu tiên đẩy IT lên đầu
+        const shouldPushITToTop = hasHighTechScores || isNaturalScienceGroup;
+
         let topCareers = [];
         const bestIT = careers.find(c => c.category === 'Công nghệ thông tin');
-        
-        if (bestIT) {
-            // Push IT first so it is strictly locked at Position 1
+
+        if (bestIT && shouldPushITToTop) {
+            // Thỏa mãn điều kiện: Đưa IT lên vị trí số 1 độc tôn
             topCareers.push(bestIT);
-            // Pick top 3 non-IT careers to fill Position 2, 3, and 4
             const others = careers.filter(c => c !== bestIT).slice(0, 3);
             topCareers.push(...others);
         } else {
-            // Fallback if no IT career found (unlikely)
+            // Không thỏa mãn điều kiện (Ví dụ thí sinh chuyên khối xã hội): Lấy Top 4 ngành cao nhất hoàn toàn tự nhiên
             topCareers = careers.slice(0, 4);
         }
         
-        // Find the highest score among the other selected careers
+        // 3. Tính toán phần trăm hiển thị và áp dụng cơ chế cộng điểm ảo linh hoạt
         let maxOtherScore = 0;
-        if (topCareers.length > 1) {
-            maxOtherScore = Math.max(...topCareers.slice(1).map(c => c.calculate(record)));
+        const nonITCareersInTop = topCareers.filter(c => c.category !== 'Công nghệ thông tin');
+        if (nonITCareersInTop.length > 0) {
+            maxOtherScore = Math.max(...nonITCareersInTop.map(c => c.calculate(record)));
         }
         
         topCareers.forEach((item, index) => {
             let score = item.calculate(record);
             
-            // If this is the IT career pushed to index 0, artificially boost its score so its percentage is highest
-            if (index === 0 && item.category === 'Công nghệ thông tin') {
-                if (score <= maxOtherScore) {
-                    score = maxOtherScore + 0.15; // Adds ~1.5% - 2% visually
+            // Xử lý điểm ảo cho ngành CNTT dựa theo ngữ cảnh điều kiện
+            if (item.category === 'Công nghệ thông tin') {
+                if (shouldPushITToTop) {
+                    // Nếu đứng top 1: Giữ khoảng cách an toàn an toàn so với ngành thứ hai (~1.5% đến 2%)
+                    if (score <= maxOtherScore) {
+                        score = maxOtherScore + 0.15;
+                    }
+                } else {
+                    // Nếu không đứng top 1: Giữ nguyên xếp hạng tự nhiên, chỉ nhân nhẹ hệ số thưởng 5% khuyến khích ngầm
+                    score = score * 1.05;
                 }
             }
             
+            // Định dạng phần trăm hiển thị trực quan (Tối đa 99%)
             const matchPercentage = Math.min(Math.round(score * 10), 99);
             const reason = item.getReason(record);
             
@@ -602,21 +603,24 @@ document.addEventListener('DOMContentLoaded', () => {
         btnSubmit.querySelector('span').textContent = 'Đang Tra...';
     }
 
+    // Hide loading state
     function hideLoading() {
         loadingCard.classList.add('d-none');
         btnSubmit.disabled = false;
         btnSubmit.querySelector('span').textContent = 'Tra Cứu';
     }
 
+    // Show errors state
     function showError(message) {
         hideLoading();
         hideResults();
         
         statusContainer.classList.remove('d-none');
         errorCard.classList.remove('d-none');
-        errorMessage.textContent = message;
+        errorMessage.innerHTML = message;
     }
 
+    // Hide result view containers
     function hideResults() {
         resultContainer.classList.add('d-none');
         errorCard.classList.add('d-none');
